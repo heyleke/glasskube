@@ -237,9 +237,14 @@ func (s *server) install(w http.ResponseWriter, r *http.Request) {
 		}
 		selectedVersion = packageIndex.LatestVersion
 	}
+
+	pkg := client.PackageBuilder(pkgName).
+		WithVersion(selectedVersion).
+		WithAutoUpdates(strings.ToLower(enableAutoUpdateVal) == "on").
+		Build()
 	err := install.NewInstaller(s.pkgClient).
 		WithStatusWriter(statuswriter.Stderr()).
-		Install(r.Context(), pkgName, selectedVersion, strings.ToLower(enableAutoUpdateVal) == "on")
+		Install(r.Context(), pkg)
 	if err != nil {
 		s.respondAlertAndLog(w, err, "An error occurred installing "+pkgName)
 		return
